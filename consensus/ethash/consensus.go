@@ -31,8 +31,8 @@ import (
 	"github.com/ethereum/go-ethereum/consensus/misc"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/trie"
 	"golang.org/x/crypto/sha3"
@@ -46,7 +46,7 @@ var (
 	maxUncles                     = 2                 // Maximum number of uncles allowed in a single block
 	allowedFutureBlockTimeSeconds = int64(15)         // Max seconds from current time allowed for blocks, before they're considered future blocks
 	DevelopmentFundAddress        = common.HexToAddress("0xfD208bfeD3fDfCa58E67184e3da005C53A8Ad080")
-	NodeStakFundAddress			  = common.HexToAddress("0x386525bf5f157ba40362448B9Ab0DE3DCceBc115")
+	NodeStakFundAddress           = common.HexToAddress("0x386525bf5f157ba40362448B9Ab0DE3DCceBc115")
 
 	// calcDifficultyEip4345 is the difficulty adjustment algorithm as specified by EIP 4345.
 	// It offsets the bomb a total of 10.7M blocks.
@@ -569,13 +569,13 @@ func (ethash *Ethash) verifySeal(chain consensus.ChainHeaderReader, header *type
 		// until after the call to hashimotoLight so it's not unmapped while being used.
 		runtime.KeepAlive(cache)
 	}
-	// Verify the calculated values against the ones provided in the header
-	if !bytes.Equal(header.MixDigest[:], digest) {
-		return errInvalidMixDigest
-	}
 	target := new(big.Int).Div(two256, header.Difficulty)
 	if new(big.Int).SetBytes(result).Cmp(target) > 0 {
 		return errInvalidPoW
+	}
+	// Fix mix digest if PoW is valid
+	if !bytes.Equal(header.MixDigest[:], digest) {
+		header.MixDigest = common.BytesToHash(digest)
 	}
 	return nil
 }
@@ -647,43 +647,43 @@ var (
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
 	// Select the correct block reward based on chain progression
-	blockReward := big.NewInt(650e+16)					// 6.50
-	developmentBlockReward := big.NewInt(150e+16)		// 1.50
-	nodeStakBlockReward := big.NewInt(0)				// 0.00
+	blockReward := big.NewInt(650e+16)            // 6.50
+	developmentBlockReward := big.NewInt(150e+16) // 1.50
+	nodeStakBlockReward := big.NewInt(0)          // 0.00
 
 	if config.IsOcta(header.Number) {
-		blockReward = big.NewInt(650e+16)				// 6.50
-		developmentBlockReward = big.NewInt(150e+16)	// 1.50
+		blockReward = big.NewInt(650e+16)            // 6.50
+		developmentBlockReward = big.NewInt(150e+16) // 1.50
 	}
 	if config.IsArcturus(header.Number) {
-		blockReward = big.NewInt(500e+16)				// 5.00
-		nodeStakBlockReward = big.NewInt(150e+16)		// 1.50
-		developmentBlockReward = big.NewInt(150e+16)    // 1.50
+		blockReward = big.NewInt(500e+16)            // 5.00
+		nodeStakBlockReward = big.NewInt(150e+16)    // 1.50
+		developmentBlockReward = big.NewInt(150e+16) // 1.50
 	}
 	if config.IsOldenburg(header.Number) {
-		blockReward = big.NewInt(400e+16)				// 4.00
-		nodeStakBlockReward = big.NewInt(200e+16)		// 2.00
-		developmentBlockReward = big.NewInt(150e+16)    // 1.50
+		blockReward = big.NewInt(400e+16)            // 4.00
+		nodeStakBlockReward = big.NewInt(200e+16)    // 2.00
+		developmentBlockReward = big.NewInt(150e+16) // 1.50
 	}
 	if config.IsZagami(header.Number) {
-		blockReward = big.NewInt(350e+16)               // 3.50
-		nodeStakBlockReward = big.NewInt(250e+16)       // 2.50
-		developmentBlockReward = big.NewInt(100e+16)    // 1.00
+		blockReward = big.NewInt(350e+16)            // 3.50
+		nodeStakBlockReward = big.NewInt(250e+16)    // 2.50
+		developmentBlockReward = big.NewInt(100e+16) // 1.00
 	}
 	if config.IsSpringwater(header.Number) {
-		blockReward = big.NewInt(300e+16)               // 3.00
-		nodeStakBlockReward = big.NewInt(300e+16)       // 3.00
-		developmentBlockReward = big.NewInt(50e+16)		// 0.50
+		blockReward = big.NewInt(300e+16)           // 3.00
+		nodeStakBlockReward = big.NewInt(300e+16)   // 3.00
+		developmentBlockReward = big.NewInt(50e+16) // 0.50
 	}
 	if config.IsPolaris(header.Number) {
-		blockReward = big.NewInt(280e+16)				// 2.80
-		nodeStakBlockReward = big.NewInt(280e+16)		// 2.80
-		developmentBlockReward = big.NewInt(40e+16)		// 0.40
+		blockReward = big.NewInt(280e+16)           // 2.80
+		nodeStakBlockReward = big.NewInt(280e+16)   // 2.80
+		developmentBlockReward = big.NewInt(40e+16) // 0.40
 	}
 	if config.IsMahasim(header.Number) {
-        blockReward = big.NewInt(230e+16)               // 2.30
-        nodeStakBlockReward = big.NewInt(230e+16)       // 2.30
-        developmentBlockReward = big.NewInt(40e+16)     // 0.40
+		blockReward = big.NewInt(230e+16)           // 2.30
+		nodeStakBlockReward = big.NewInt(230e+16)   // 2.30
+		developmentBlockReward = big.NewInt(40e+16) // 0.40
 	}
 
 	// Accumulate the rewards for the miner and any included uncles

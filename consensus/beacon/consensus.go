@@ -170,10 +170,11 @@ func (beacon *Beacon) VerifyUncles(chain consensus.ChainReader, block *types.Blo
 // verifyHeader checks whether a header conforms to the consensus rules of the
 // stock Ethereum consensus engine. The difference between the beacon and classic is
 // (a) The following fields are expected to be constants:
-//     - difficulty is expected to be 0
-// 	   - nonce is expected to be 0
-//     - unclehash is expected to be Hash(emptyHeader)
+//   - difficulty is expected to be 0
+//   - nonce is expected to be 0
+//   - unclehash is expected to be Hash(emptyHeader)
 //     to be the desired constants
+//
 // (b) the timestamp is not verified anymore
 // (c) the extradata is limited to 32 bytes
 func (beacon *Beacon) verifyHeader(chain consensus.ChainHeaderReader, header, parent *types.Header) error {
@@ -294,7 +295,7 @@ func (beacon *Beacon) FinalizeAndAssemble(chain consensus.ChainHeaderReader, hea
 //
 // Note, the method returns immediately and will send the result async. More
 // than one result may also be returned depending on the consensus algorithm.
-func (beacon *Beacon) Seal(chain consensus.ChainHeaderReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
+func (beacon *Beacon) Seal(chain consensus.ChainHeaderReader, block *types.Block, results chan<- types.SealResult, stop <-chan struct{}) error {
 	if !beacon.IsPoSHeader(block.Header()) {
 		return beacon.ethone.Seal(chain, block, results, stop)
 	}
