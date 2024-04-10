@@ -685,6 +685,26 @@ func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 		nodeStakBlockReward = big.NewInt(230e+16)   // 2.30
 		developmentBlockReward = big.NewInt(40e+16) // 0.40
 	}
+	if config.IsDnepr(header.Number) {
+		blockReward = big.NewInt(185e+16)         // 1.85
+		nodeStakBlockReward = big.NewInt(175e+16) // 1.75
+		developmentBlockReward = big.NewInt(40e+16)
+	}
+	if config.IsBlackeye(header.Number) {
+		blockReward = big.NewInt(120e+16)           // 1.20
+		nodeStakBlockReward = big.NewInt(100e+16)   // 1.00
+		developmentBlockReward = big.NewInt(30e+16) // 0.30
+	}
+	if config.IsVega(header.Number) {
+		blockReward = big.NewInt(110e+16)           // 1.10
+		nodeStakBlockReward = big.NewInt(85e+16)    // 0.85
+		developmentBlockReward = big.NewInt(30e+16) // 0.30
+	}
+	if config.IsTriangulum(header.Number) {
+		blockReward = big.NewInt(100e+16)           // 1.00
+		nodeStakBlockReward = big.NewInt(70e+16)    // 0.70
+		developmentBlockReward = big.NewInt(30e+16) // 0.30
+	}
 
 	// Accumulate the rewards for the miner and any included uncles
 	reward := new(big.Int).Set(blockReward)
